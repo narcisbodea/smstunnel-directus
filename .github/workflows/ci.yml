@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node.js ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22", "24", "26"]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: The sandboxed API bundle imports nothing but directus:api
+        run: |
+          node -e "const s=require('fs').readFileSync('dist/api.js','utf8'); const imports=[...s.matchAll(/(?:from|import)\s*[\"']([^\"']+)[\"']/g)].map(m=>m[1]); if (imports.some(i=>i!=='directus:api')) { console.error('imports:', imports); process.exit(1) }"
+      - name: The package holds only dist, README, CHANGELOG and LICENSE
+        run: npm pack --dry-run

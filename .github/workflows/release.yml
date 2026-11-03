@@ -1,0 +1,41 @@
+# Publishes to npm when a tag like v1.0.1 is pushed, with npm Trusted Publishing (OIDC): no npm token is stored
+# anywhere. Set up once on npmjs.com (package → Settings → Trusted Publisher) and in GitHub (environment "npm").
+# See PUBLISHING.md.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+      - name: npm 11.5.1 or newer (needed for Trusted Publishing)
+        run: npm install -g npm@latest
+      - name: The tag matches package.json
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $version" >&2
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm publish --access public

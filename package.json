@@ -1,0 +1,85 @@
+{
+  "name": "@narcisbodea/smstunnel-directus",
+  "version": "1.0.0",
+  "description": "SMSTunnel for Directus: a \"Send a text with SMSTunnel\" operation for Flows. Texts go out from your own Android phone, from your own number.",
+  "icon": "sms",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-extension-operation",
+    "directus-custom-operation",
+    "flows",
+    "smstunnel",
+    "sms",
+    "text-message",
+    "android",
+    "own-number"
+  ],
+  "homepage": "https://github.com/narcisbodea/smstunnel-directus#readme",
+  "bugs": {
+    "url": "https://github.com/narcisbodea/smstunnel-directus/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/narcisbodea/smstunnel-directus.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Narcis Bodea",
+    "email": "contact@narboweb.ro",
+    "url": "https://smstunnel.io"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "directus:extension": {
+    "type": "operation",
+    "path": {
+      "app": "dist/app.js",
+      "api": "dist/api.js"
+    },
+    "source": {
+      "app": "src/app.ts",
+      "api": "src/api.ts"
+    },
+    "host": "^11.0.0 || ^12.0.0",
+    "sandbox": {
+      "enabled": true,
+      "requestedScopes": {
+        "request": {
+          "methods": [
+            "GET",
+            "POST"
+          ],
+          "urls": [
+            "https://smstunnel.io/api/v1/*"
+          ]
+        },
+        "log": {}
+      }
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "directus-extension build",
+    "dev": "directus-extension build -w --no-minify",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test \"test/unit/*.test.ts\"",
+    "test:local-api": "node --import tsx --test \"test/e2e/*.test.ts\"",
+    "test:e2e": "node e2e/run.mjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "^18.1.0",
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

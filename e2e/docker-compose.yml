@@ -1,0 +1,25 @@
+# End-to-end test of @narcisbodea/smstunnel-directus in the official Directus image (SQLite). Run it with
+# `npm run test:e2e` (../run.mjs): project smst-r3-directus, removed with `down -v` at the end.
+# DIRECTUS_VERSION picks the image (default 12.6.0).
+services:
+  directus:
+    image: directus/directus:${DIRECTUS_VERSION:-12.6.0}
+    environment:
+      SECRET: e2e-directus-secret-0123456789abcdef
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: e2e-admin-password
+      DB_CLIENT: sqlite3
+      DB_FILENAME: /directus/database/data.db
+      PUBLIC_URL: http://127.0.0.1:${DIRECTUS_PORT:-19320}
+      # What the README asks for: the key in the environment, readable by flows as {{ $env.SMSTUNNEL_API_KEY }}.
+      SMSTUNNEL_API_KEY: ${SMSTUNNEL_API_KEY:?set by run.mjs}
+      FLOWS_ENV_ALLOW_LIST: SMSTUNNEL_API_KEY
+      EXTENSIONS_MUST_LOAD: "true"
+      TELEMETRY: "false"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # The built extension, with a package.json whose sandbox may call only the local SMSTunnel API.
+      - ./.work/extension:/directus/extensions/smstunnel-directus:ro
+    ports:
+      - "127.0.0.1:${DIRECTUS_PORT:-19320}:8055"
